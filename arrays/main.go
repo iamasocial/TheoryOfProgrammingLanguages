@@ -30,17 +30,15 @@ func main() {
 		case "rand":
 			random(command, arrays)
 		case "concat":
-			//
+			concat(command, arrays)
 		case "free":
 			free(command, arrays)
 		case "remove":
-			//
+			remove(command, arrays)
 		case "copy":
-			//
-		case "sortnondesc":
-			//
-		case "sortnonasc":
-			//
+			copy(command, arrays)
+		case "sort":
+			sort(command, arrays)
 		case "shuffle":
 			//
 		case "stats":
@@ -112,9 +110,12 @@ func saveArray(command []string, arrays map[string][]int) {
 	arrayName := command[1]
 	fileName := command[2]
 
-	numbers, ok := arrays[arrayName]
-	if !ok {
-		fmt.Println("Array ", arrayName, " doesn't exist")
+	numbers, _ := arrays[arrayName]
+	// if !ok {
+	// 	fmt.Println("Array ", arrayName, " doesn't exist")
+	// 	return
+	// }
+	if !arrayExists(arrayName, arrays) {
 		return
 	}
 
@@ -167,15 +168,36 @@ func random(command []string, arrays map[string][]int) {
 		r := rand.New(seed).Int()
 		randomNumber := min + r%(max-min+1)
 		numbers = append(numbers, randomNumber)
-		// fmt.Println(randomNumber)
+		fmt.Println(randomNumber)
 	}
 
 	arrays[arrayName] = numbers
-	fmt.Printf("%v random numbers were generated and added to array \"%s\"\n", count, arrayName)
+	fmt.Printf("%v random numbers were generated and added to array \"%s\" successfully.\n", count, arrayName)
 }
 
 func concat(command []string, arrays map[string][]int) {
+	if len(command) != 3 {
+		fmt.Println("Invalid format")
+		return
+	}
 
+	arrayName1 := command[1]
+	arrayName2 := command[2]
+
+	if !arrayExists(arrayName1, arrays) {
+		return
+	}
+
+	if !arrayExists(arrayName2, arrays) {
+		return
+	}
+
+	length := len(arrays[arrayName2])
+	for i := 0; i < length; i++ {
+		arrays[arrayName1] = append(arrays[arrayName1], arrays[arrayName2][i])
+	}
+
+	fmt.Println("Arrays were concatenated successfully.")
 }
 
 func free(command []string, arrays map[string][]int) {
@@ -185,13 +207,142 @@ func free(command []string, arrays map[string][]int) {
 	}
 
 	arrayName := command[1]
-	_, ok := arrays[arrayName]
-	if !ok {
-		fmt.Printf("Array \"%s\" does not exists\n", arrayName)
+	if !arrayExists(arrayName, arrays) {
 		return
 	}
 
 	arrays[arrayName] = []int{}
 
 	fmt.Printf("Arrays \"%s\" is empty now\n", arrayName)
+}
+
+func remove(command []string, arrays map[string][]int) {
+	if len(command) != 4 {
+		fmt.Println("Invalid command")
+		return
+	}
+
+	arrayName := command[1]
+	if !arrayExists(arrayName, arrays) {
+		return
+	}
+
+	index, err := strconv.Atoi(command[2])
+	if err != nil {
+		fmt.Println("Bad index")
+		return
+	}
+
+	count, err := strconv.Atoi(command[3])
+	if err != nil {
+		fmt.Println("Bad count")
+		return
+	}
+
+	if index+count > len(arrays[arrayName]) {
+		fmt.Println("You want to remove too much. Try again")
+		return
+	}
+
+	tmp := arrays[arrayName][:index]
+	tmp = append(tmp, arrays[arrayName][count+index:]...)
+	arrays[arrayName] = tmp
+	fmt.Println(arrays[arrayName])
+	fmt.Println("Elements were removed successfully.")
+}
+
+func copy(command []string, arrays map[string][]int) {
+	if len(command) != 5 {
+		fmt.Println("Invalid command.")
+		return
+	}
+
+	arrayName1 := command[1]
+	arrayName2 := command[4]
+
+	if !arrayExists(arrayName1, arrays) {
+		return
+	}
+
+	if !arrayExists(arrayName2, arrays) {
+		return
+	}
+
+	begin, err := strconv.Atoi(command[2])
+	if err != nil {
+		fmt.Println("First index is bad.")
+		return
+	}
+
+	end, err := strconv.Atoi(command[3])
+	if err != nil {
+		fmt.Println("Second index is bad.")
+		return
+	}
+
+	if len(arrays[arrayName1]) < begin || len(arrays[arrayName2]) < end {
+		fmt.Println("Index is out of range.")
+		return
+	}
+
+	arrays[arrayName2] = append(arrays[arrayName2], arrays[arrayName1][begin:end+1]...)
+	fmt.Println(arrays[arrayName2])
+	fmt.Println("Copied successfully.")
+}
+
+func sort(command []string, arrays map[string][]int) {
+	if len(command) != 3 {
+		fmt.Println("Invalid Command")
+		return
+	}
+
+	arrayName := command[1]
+	if !arrayExists(arrayName, arrays) {
+		return
+	}
+
+	sign := command[2]
+	arrays[arrayName] = quickSort(arrays[arrayName], sign)
+	fmt.Println("Sorted array: ", arrays[arrayName])
+}
+
+func shuffle(command []string, arrays map[string][]int) {
+
+}
+
+func arrayExists(name string, arrays map[string][]int) bool {
+	_, ok := arrays[name]
+	if !ok {
+		fmt.Printf("Array \"%s\" does not exists\n", name)
+		return ok
+	}
+
+	return ok
+}
+
+func quickSort(array []int, sign string) []int {
+	if len(array) < 2 {
+		return array
+	}
+
+	if sign != "+" && sign != "-" {
+		fmt.Println("Bad sort argument")
+		return array
+	}
+	var less, more []int
+
+	op := array[0]
+	for _, value := range array[1:] {
+		if value <= op {
+			less = append(less, value)
+		} else {
+			more = append(more, value)
+		}
+	}
+
+	if sign == "+" {
+		return append(append(quickSort(less, sign), op), quickSort(more, sign)...)
+	} else {
+		return append(append(quickSort(more, sign), op), quickSort(less, sign)...)
+	}
 }

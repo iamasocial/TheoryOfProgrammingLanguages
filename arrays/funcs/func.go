@@ -3,6 +3,7 @@ package funcs
 import (
 	"bufio"
 	"fmt"
+	"math"
 	"math/rand"
 	"os"
 	"strings"
@@ -62,4 +63,82 @@ func Mix(arr []int) []int {
 	}
 
 	return arr
+}
+
+func GetMin(arr []int) (int, int) {
+	min := math.MaxInt
+	var minIndex int
+	for i, value := range arr {
+		if value < min {
+			min = value
+			minIndex = i
+		}
+	}
+
+	return min, minIndex
+}
+
+func GetMax(arr []int) (int, int) {
+	max := math.MinInt
+	var maxIndex int
+	for i, value := range arr {
+		if value > max {
+			max = value
+			maxIndex = i
+		}
+	}
+
+	return max, maxIndex
+}
+
+func getSet(arr []int) map[int]int {
+	set := make(map[int]int)
+	for _, value := range arr {
+		set[value]++
+	}
+
+	return set
+}
+
+func GetMostCommon(arr []int) int {
+	set := getSet(arr)
+	if len(arr) == len(set) {
+		max, _ := GetMax(arr)
+		return max
+	}
+
+	var maxKey, maxValue int
+	for key, value := range set {
+		if value > maxValue {
+			maxValue = value
+			maxKey = key
+		}
+
+		if value == maxValue {
+			maxKey = int(math.Max(float64(maxKey), float64(key)))
+		}
+	}
+
+	return maxKey
+}
+
+func GetMean(arr []int) float64 {
+	var sum float64
+	for _, value := range arr {
+		sum += float64(value)
+	}
+	return sum / float64(len(arr))
+}
+
+func GetMaxDeviation(arr []int) float64 {
+	mean := GetMean(arr)
+	var maxDev float64
+	for _, value := range arr {
+		dev := math.Abs(float64(value) - mean)
+		if dev > maxDev {
+			maxDev = dev
+		}
+	}
+
+	return maxDev
 }

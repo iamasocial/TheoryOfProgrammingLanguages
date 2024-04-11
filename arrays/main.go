@@ -20,7 +20,6 @@ func main() {
 		switch command[0] {
 		case "load":
 			opers.LoadArray(command, arrays)
-			// fmt.Println(arrays)
 		case "save":
 			opers.SaveArray(command, arrays)
 		case "rand":
@@ -38,9 +37,9 @@ func main() {
 		case "shuffle":
 			opers.Shuffle(command, arrays)
 		case "stats":
-			//
+			opers.Stats(command, arrays)
 		case "print":
-			//
+			opers.Print(command, arrays)
 		case "exit":
 			fmt.Println("Bye :)")
 			os.Exit(0)

@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	file, err := os.Open("aov.txt")
+	file, err := os.Open("script.txt")
 	if err != nil {
 		fmt.Println("Error opening file:", err)
 		return

@@ -47,7 +47,7 @@ func main() {
 				}
 				currentArea.Vars[name] = value
 			} else {
-				panic("Govno, ne rabotaet")
+				panic("Other error")
 			}
 		}
 	}

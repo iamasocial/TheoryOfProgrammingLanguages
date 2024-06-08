@@ -11,6 +11,11 @@ import (
 	"time"
 )
 
+type Func func([]string, map[string][]int)
+
+var FuncMap map[string]Func
+var Arrays map[string][]int
+
 func LoadArray(command []string, arrays map[string][]int) {
 	if len(command) != 3 {
 		fmt.Println("invalid command")
@@ -222,18 +227,18 @@ func Copy(command []string, arrays map[string][]int) {
 	}
 
 	begin, err := strconv.Atoi(command[2])
-	if err != nil {
+	if err != nil || begin < 0 {
 		fmt.Println("First index is bad.")
 		return
 	}
 
 	end, err := strconv.Atoi(command[3])
-	if err != nil {
+	if err != nil || end < 0 {
 		fmt.Println("Second index is bad.")
 		return
 	}
 
-	if len(arrays[name1])-1 < begin || len(arrays[name2])-1 < end {
+	if len(arrays[name1])-1 < begin || len(arrays[name1])-1 < end {
 		fmt.Println("Index out of range.")
 		return
 	}
@@ -368,4 +373,27 @@ func Print(command []string, arrays map[string][]int) {
 		return
 	}
 
+}
+
+func Exit(command []string, arrays map[string][]int) {
+	fmt.Println("Bye :)")
+	os.Exit(0)
+}
+
+func init() {
+	Arrays = make(map[string][]int)
+	FuncMap = map[string]Func{
+		"load":    LoadArray,
+		"save":    SaveArray,
+		"rand":    Random,
+		"concat":  Concat,
+		"free":    Free,
+		"remove":  Remove,
+		"copy":    Copy,
+		"sort":    Sort,
+		"shuffle": Shuffle,
+		"stats":   Stats,
+		"print":   Print,
+		"exit":    Exit,
+	}
 }

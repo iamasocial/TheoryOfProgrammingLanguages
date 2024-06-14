@@ -17,10 +17,11 @@ var FuncMap map[string]Func
 var Arrays map[string][]int
 
 func LoadArray(command []string, arrays map[string][]int) {
-	if len(command) != 3 {
+	if len(command) != 3 || !isTerm(command) {
 		fmt.Println("invalid command")
 		return
 	}
+	command[2] = cutTerm(getLastWord(command))
 
 	name := command[1]
 	fileName := command[2]
@@ -57,13 +58,14 @@ func LoadArray(command []string, arrays map[string][]int) {
 }
 
 func SaveArray(command []string, arrays map[string][]int) {
-	if len(command) != 3 {
+	if len(command) != 3 || !isTerm(command) {
 		fmt.Println("Invalid command")
 		return
 	}
+	lastWord := cutTerm(getLastWord(command))
 
 	name := command[1]
-	fileName := command[2]
+	fileName := lastWord
 
 	if !funcs.ArrayExists(name, arrays) {
 		return
@@ -89,10 +91,11 @@ func SaveArray(command []string, arrays map[string][]int) {
 }
 
 func Random(command []string, arrays map[string][]int) {
-	if len(command) != 5 {
+	if len(command) != 5 || !isTerm(command) {
 		fmt.Println("Invalid command")
 		return
 	}
+	command[4] = cutTerm(getLastWord(command))
 
 	name := command[1]
 	count, err := strconv.Atoi(command[2])
@@ -135,12 +138,13 @@ func Random(command []string, arrays map[string][]int) {
 }
 
 func Concat(command []string, arrays map[string][]int) {
-	if len(command) != 3 {
+	if len(command) != 3 || !isTerm(command) {
 		fmt.Println("Invalid format")
 		return
 	}
 
 	name1 := command[1]
+	command[2] = cutTerm(getLastWord(command))
 	name2 := command[2]
 
 	if !funcs.ArrayExists(name1, arrays) {
@@ -160,11 +164,11 @@ func Concat(command []string, arrays map[string][]int) {
 }
 
 func Free(command []string, arrays map[string][]int) {
-	if len(command) != 2 {
+	if len(command) != 2 || !isTerm(command) {
 		fmt.Println("Invalid command")
 		return
 	}
-
+	command[1] = cutTerm(getLastWord(command))
 	name := command[1]
 	if !funcs.ArrayExists(name, arrays) {
 		return
@@ -192,6 +196,7 @@ func Remove(command []string, arrays map[string][]int) {
 		return
 	}
 
+	command[3] = cutTerm(getLastWord(command))
 	count, err := strconv.Atoi(command[3])
 	if err != nil {
 		fmt.Println("Bad count")
@@ -210,12 +215,13 @@ func Remove(command []string, arrays map[string][]int) {
 }
 
 func Copy(command []string, arrays map[string][]int) {
-	if len(command) != 5 {
+	if len(command) != 5 || !isTerm(command) {
 		fmt.Println("Invalid command.")
 		return
 	}
 
 	name1 := command[1]
+	command[4] = cutTerm(getLastWord(command))
 	name2 := command[4]
 
 	if !funcs.ArrayExists(name1, arrays) {
@@ -248,27 +254,26 @@ func Copy(command []string, arrays map[string][]int) {
 }
 
 func Sort(command []string, arrays map[string][]int) {
-	if len(command) != 3 {
+	if len(command) != 3 || !isTerm(command) {
 		fmt.Println("Invalid Command")
 		return
 	}
-
 	name := command[1]
 	if !funcs.ArrayExists(name, arrays) {
 		return
 	}
-
+	command[2] = cutTerm(getLastWord(command))
 	sign := command[2]
 	arrays[name] = funcs.QuickSort(arrays[name], sign)
 	fmt.Printf("Arrays \"%s\" was sorted successfully\n", name)
 }
 
 func Shuffle(command []string, arrays map[string][]int) {
-	if len(command) != 2 {
+	if len(command) != 2 || !isTerm(command) {
 		fmt.Println("Invalid command")
 		return
 	}
-
+	command[1] = cutTerm(getLastWord(command))
 	name := command[1]
 
 	if !funcs.ArrayExists(name, arrays) {
@@ -280,11 +285,11 @@ func Shuffle(command []string, arrays map[string][]int) {
 }
 
 func Stats(command []string, arrays map[string][]int) {
-	if len(command) != 2 {
+	if len(command) != 2 || !isTerm(command) {
 		fmt.Println("Invalid command")
 		return
 	}
-
+	command[1] = cutTerm(getLastWord(command))
 	name := command[1]
 
 	if !funcs.ArrayExists(name, arrays) {
@@ -310,7 +315,7 @@ func Stats(command []string, arrays map[string][]int) {
 
 func Print(command []string, arrays map[string][]int) {
 	length := len(command)
-	if length < 3 || length > 4 {
+	if length < 3 || length > 4 || !isTerm(command) {
 		fmt.Println("Invalid command")
 		return
 	}
@@ -322,6 +327,7 @@ func Print(command []string, arrays map[string][]int) {
 	}
 
 	if length == 3 {
+		command[2] = cutTerm(getLastWord(command))
 		if strings.ToLower(command[2]) == "all" {
 			if len(arrays[name]) == 0 {
 				fmt.Printf("Array \"%s\" is empty\n", name)
@@ -344,6 +350,7 @@ func Print(command []string, arrays map[string][]int) {
 		fmt.Println(arrays[name][index])
 		return
 	} else if length == 4 {
+		command[3] = cutTerm(getLastWord(command))
 		firstIndex, err := strconv.Atoi(command[2])
 		if err != nil {
 			fmt.Println("Bad first index")
@@ -378,6 +385,21 @@ func Print(command []string, arrays map[string][]int) {
 func Exit(command []string, arrays map[string][]int) {
 	fmt.Println("Bye :)")
 	os.Exit(0)
+}
+
+func isTerm(line []string) bool {
+	lastWord := getLastWord(line)
+	lastChar := lastWord[len(lastWord)-1]
+	return lastChar == ';'
+}
+
+func getLastWord(line []string) string {
+	lastWord := line[len(line)-1]
+	return lastWord
+}
+
+func cutTerm(line string) string {
+	return line[:len(line)-1]
 }
 
 func init() {
